@@ -1,58 +1,71 @@
-// src/StaticStack.cpp
 #include "StaticStack.h"
+#include "Timestamp.h"
 #include <stdexcept>
+#include <vector>
 
-// Construtor: inicializa o tamanho atual como 0
-StaticStack::StaticStack() : currentSize(0) {}
+template<typename T>
+StaticStack<T>::StaticStack() : m_top(0) {}
 
-// Adiciona um timestamp ao topo da pilha (push)
-void StaticStack::add(const Timestamp& ts) {
-    if (currentSize < MAX_STATIC_SIZE) {
-        data[currentSize++] = ts;
-    } else {
-        // Lançar exceção ou lidar com o erro de pilha cheia
+template<typename T>
+bool StaticStack<T>::isEmpty() const {
+    return m_top == 0;
+}
+
+template<typename T>
+int StaticStack<T>::size() const {
+    return m_top;
+}
+
+template<typename T>
+void StaticStack<T>::clear() {
+    m_top = 0;
+}
+
+template<typename T>
+void StaticStack<T>::push(const T& value) {
+    if (m_top >= MAX_SIZE) {
         throw std::out_of_range("StaticStack is full");
     }
+    m_arr[m_top++] = value;
 }
 
-// Retorna uma referência para o timestamp em um determinado índice.
-// Nota: Acesso por índice não é típico para pilhas, mas é necessário para satisfazer a interface IDataStructure.
-// Em uma aplicação de pilha pura, este método não existiria ou lançaria uma exceção.
-Timestamp& StaticStack::get(int index) {
-    if (index >= 0 && index < currentSize) {
-        return data[index];
-    } else {
-        throw std::out_of_range("Index out of bounds for StaticStack");
+template<typename T>
+T StaticStack<T>::pop() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticStack is empty");
     }
+    return m_arr[--m_top];
 }
 
-// Retorna o número de elementos na pilha
-int StaticStack::size() const {
-    return currentSize;
-}
-
-// Converte a parte utilizada da pilha estática para um vetor de Timestamps
-std::vector<Timestamp> StaticStack::toVector() const {
-    std::vector<Timestamp> vec;
-    vec.reserve(currentSize); // Otimização: reserva espaço
-    for (int i = 0; i < currentSize; ++i) {
-        vec.push_back(data[i]);
+template<typename T>
+T& StaticStack<T>::top() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticStack is empty");
     }
-    return vec;
+    return m_arr[m_top - 1];
 }
 
-// Limpa a pilha estática redefinindo o tamanho atual para 0
-void StaticStack::clear() {
-    currentSize = 0;
-    // Não é necessário limpar os elementos da array, pois eles serão sobrescritos
+template<typename T>
+std::vector<T> StaticStack<T>::toVector() const {
+    return std::vector<T>(m_arr, m_arr + m_top);
 }
 
-// Remove e retorna o timestamp do topo da pilha (pop)
-Timestamp StaticStack::pop() {
-    if (currentSize > 0) {
-        return data[--currentSize];
-    } else {
-        throw std::out_of_range("Pop from empty StaticStack");
+template<typename T>
+T& StaticStack<T>::get(int index) {
+    if (index < 0 || index >= m_top) {
+        throw std::out_of_range("StaticStack: Index out of range.");
     }
+    return m_arr[index];
 }
 
+template<typename T>
+void StaticStack<T>::set(int index, const T& value) {
+    if (index < 0 || index >= m_top) {
+        throw std::out_of_range("StaticStack: Index out of range.");
+    }
+    m_arr[index] = value;
+}
+
+template T& StaticStack<Timestamp>::get(int);
+template void StaticStack<Timestamp>::set(int, const Timestamp&);
+template class StaticStack<Timestamp>;

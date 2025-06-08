@@ -1,41 +1,32 @@
-// src/Timestamp.h
-#ifndef TIMESTAMP_H
-#define TIMESTAMP_H
-
+#pragma once
 #include <iostream>
 
-// Classe para representar um timestamp
 class Timestamp {
+private:
+    long long m_timestamp;
+
 public:
-    long long value;
+    // Construtor padrão e de inicialização
+    Timestamp(long long timestamp = 0) : m_timestamp(timestamp) {}
 
-    // Construtor padrão
-    Timestamp() : value(0) {}
-
-    // Construtor com valor
-    Timestamp(long long val) : value(val) {}
-
-    // Operador de comparação para ordenação (menor que)
-    bool operator<(const Timestamp& other) const {
-        return value < other.value;
+    // Getter para o valor do timestamp
+    long long getTimestamp() const {
+        return m_timestamp;
     }
 
-    // Operador de comparação para ordenação (maior que)
+    // Operador de comparação "maior que" para o TimSort
     bool operator>(const Timestamp& other) const {
-        return value > other.value;
+        return m_timestamp > other.m_timestamp;
     }
 
-    // Operador de igualdade
-    bool operator==(const Timestamp& other) const {
-        return value == other.value;
+    // Operador de comparação "menor ou igual a" para o TimSort
+    bool operator<=(const Timestamp& other) const {
+        return m_timestamp <= other.m_timestamp;
     }
 
-    // Sobrecarga do operador de inserção para facilitar a impressão
+    // Operador de stream para facilitar a impressão nos arquivos de saída
     friend std::ostream& operator<<(std::ostream& os, const Timestamp& ts) {
-        os << ts.value;
+        os << ts.m_timestamp;
         return os;
     }
 };
-
-#endif // TIMESTAMP_H
-

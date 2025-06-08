@@ -1,46 +1,99 @@
-// src/DynamicStack.cpp
 #include "DynamicStack.h"
+#include "Timestamp.h"
 #include <stdexcept>
+#include <vector>
 
-// Adiciona um timestamp ao topo da pilha (push)
-void DynamicStack::add(const Timestamp& ts) {
-    data.push_back(ts);
+template<typename T>
+DynamicStack<T>::DynamicStack() : m_top(nullptr), m_size(0) {}
+
+template<typename T>
+DynamicStack<T>::~DynamicStack() {
+    clear();
 }
 
-// Retorna uma referência para o timestamp em um determinado índice.
-// Nota: Acesso por índice não é típico para pilhas, mas é necessário para satisfazer a interface IDataStructure.
-// Em uma aplicação de pilha pura, este método não existiria ou lançaria uma exceção.
-Timestamp& DynamicStack::get(int index) {
-    if (index >= 0 && index < data.size()) {
-        return data.at(index);
-    } else {
-        throw std::out_of_range("Index out of bounds for DynamicStack");
+template<typename T>
+void DynamicStack<T>::clear() {
+    while (!isEmpty()) {
+        pop();
     }
 }
 
-// Retorna o número de elementos na pilha
-int DynamicStack::size() const {
-    return data.size();
+template<typename T>
+bool DynamicStack<T>::isEmpty() const {
+    return m_top == nullptr;
 }
 
-// Converte a pilha dinâmica para um vetor de Timestamps
-std::vector<Timestamp> DynamicStack::toVector() const {
-    return data;
+template<typename T>
+int DynamicStack<T>::size() const {
+    return m_size;
 }
 
-// Limpa todos os elementos da pilha
-void DynamicStack::clear() {
-    data.clear();
+template<typename T>
+void DynamicStack<T>::push(const T& value) {
+    m_top = new Node(value, m_top);
+    m_size++;
 }
 
-// Remove e retorna o timestamp do topo da pilha (pop)
-Timestamp DynamicStack::pop() {
-    if (!data.empty()) {
-        Timestamp top = data.back();
-        data.pop_back();
-        return top;
-    } else {
-        throw std::out_of_range("Pop from empty DynamicStack");
+template<typename T>
+T DynamicStack<T>::pop() {
+    if (isEmpty()) {
+        throw std::out_of_range("DynamicStack is empty");
     }
+    T value = m_top->data;
+    Node* oldTop = m_top;
+    m_top = m_top->next;
+    delete oldTop;
+    m_size--;
+    return value;
 }
 
+template<typename T>
+T& DynamicStack<T>::top() {
+    if (isEmpty()) {
+        throw std::out_of_range("DynamicStack is empty");
+    }
+    return m_top->data;
+}
+
+template<typename T>
+std::vector<T> DynamicStack<T>::toVector() const {
+    std::vector<T> vec;
+    vec.reserve(m_size);
+    Node* current = m_top;
+    while(current != nullptr) {
+        vec.push_back(current->data);
+        current = current->next;
+    }
+    // A pilha é LIFO, então o vetor precisa ser revertido para a ordem de inserção
+    std::reverse(vec.begin(), vec.end());
+    return vec;
+}
+
+template<typename T>
+T& DynamicStack<T>::get(int index) {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("DynamicStack: Index out of range.");
+    }
+    // O acesso a índice na pilha é LIFO, então o índice 0 é o topo.
+    Node* current = m_top;
+    for (int i = 0; i < index; ++i) {
+        current = current->next;
+    }
+    return current->data;
+}
+
+template<typename T>
+void DynamicStack<T>::set(int index, const T& value) {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("DynamicStack: Index out of range.");
+    }
+    Node* current = m_top;
+    for (int i = 0; i < index; ++i) {
+        current = current->next;
+    }
+    current->data = value;
+}
+
+template T& DynamicStack<Timestamp>::get(int);
+template void DynamicStack<Timestamp>::set(int, const Timestamp&);
+template class DynamicStack<Timestamp>;

@@ -1,60 +1,78 @@
-// src/main.cpp
 #include <iostream>
 #include <vector>
 #include <string>
-#include <memory>
 
+// Inclui todas as estruturas de dados e classes necessárias
 #include "FileProcessor.h"
-#include "DynamicList.h"
+#include "IDataStructure.h"
+#include "Timestamp.h"
 #include "StaticList.h"
-#include "DynamicStack.h"
+#include "DynamicList.h"
 #include "StaticStack.h"
-#include "DynamicQueue.h"
+#include "DynamicStack.h"
 #include "StaticQueue.h"
+#include "DynamicQueue.h"
 
-int main() {
-    std::vector<int> dataset_sizes = {100, 1000, 10000, 100000, 1000000};
-    std::string base_input_path = "../datasets/ratings";
-    std::string base_output_path = "../ordened/";
+/**
+ * @brief Função auxiliar para executar o processo de ordenação para uma estrutura de dados específica.
+ * * @param dataStructure Ponteiro para a estrutura de dados a ser testada.
+ * @param structureName Nome da estrutura (usado para criar os diretórios de saída).
+ * @param sizes Vetor com os diferentes tamanhos de datasets a serem testados.
+ * @param inputBasePath Caminho base para os arquivos de entrada.
+ * @param outputBasePath Caminho base para os arquivos de saída.
+ */
+void runForStructure(
+    IDataStructure<Timestamp>* dataStructure,
+    const std::string& structureName,
+    const std::vector<int>& sizes,
+    const std::string& inputBasePath,
+    const std::string& outputBasePath)
+{
+    std::cout << "========================================\n";
+    std::cout << "Iniciando processamento para: " << structureName << "\n";
+    std::cout << "========================================\n";
 
     FileProcessor processor;
 
-    for (int size : dataset_sizes) {
-        std::string input_file = base_input_path + std::to_string(size) + ".csv";
+    for (int size : sizes) {
+        // Limpa a estrutura de dados para garantir que esteja vazia para o próximo arquivo
+        dataStructure->clear();
 
-        // Processar com DynamicList
-        std::unique_ptr<IDataStructure> dynamicList = std::make_unique<DynamicList>();
-        std::string output_dynamic_list = base_output_path + "dynamicList/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(dynamicList), input_file, output_dynamic_list);
+        std::string inputFile = inputBasePath + "ratings" + std::to_string(size) + ".csv";
+        std::string outputFile = outputBasePath + structureName + "/ratings" + std::to_string(size) + ".csv";
 
-        // Processar com StaticList
-        // Nota: Certifique-se de que MAX_STATIC_SIZE em StaticList.h é >= ao maior tamanho de dataset.
-        std::unique_ptr<IDataStructure> staticList = std::make_unique<StaticList>();
-        std::string output_static_list = base_output_path + "staticList/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(staticList), input_file, output_static_list);
-
-        // Processar com DynamicStack
-        std::unique_ptr<IDataStructure> dynamicStack = std::make_unique<DynamicStack>();
-        std::string output_dynamic_stack = base_output_path + "dynamicStack/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(dynamicStack), input_file, output_dynamic_stack);
-
-        // Processar com StaticStack
-        std::unique_ptr<IDataStructure> staticStack = std::make_unique<StaticStack>();
-        std::string output_static_stack = base_output_path + "staticStack/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(staticStack), input_file, output_static_stack);
-
-        // Processar com DynamicQueue
-        std::unique_ptr<IDataStructure> dynamicQueue = std::make_unique<DynamicQueue>();
-        std::string output_dynamic_queue = base_output_path + "dynamicQueue/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(dynamicQueue), input_file, output_dynamic_queue);
-
-        // Processar com StaticQueue
-        std::unique_ptr<IDataStructure> staticQueue = std::make_unique<StaticQueue>();
-        std::string output_static_queue = base_output_path + "staticQueue/ratings" + std::to_string(size) + ".csv";
-        processor.processFile(std::move(staticQueue), input_file, output_static_queue);
+        // Chama o método correto do FileProcessor, passando o ponteiro para a estrutura
+        processor.processAndSort(dataStructure, inputFile, outputFile);
+        std::cout << "----------------------------------------\n";
     }
+}
+
+int main() {
+    // Define os tamanhos dos datasets e os caminhos base
+    std::vector<int> datasetSizes = {100, 1000, 10000, 100000, 1000000};
+    std::string inputPath = "datasets/";
+    std::string outputPath = "ordened/";
+
+    // --- Cria uma instância de cada uma das 6 estruturas de dados ---
+    StaticList<Timestamp> staticList;
+    DynamicList<Timestamp> dynamicList;
+    StaticStack<Timestamp> staticStack;
+    DynamicStack<Timestamp> dynamicStack;
+    StaticQueue<Timestamp> staticQueue;
+    DynamicQueue<Timestamp> dynamicQueue;
+
+    // --- Executa o processo para cada estrutura ---
+    // Nota: Certifique-se que os diretórios de saída (ex: "ordened/staticList/") existem
+    // antes de rodar o programa.
+    
+    runForStructure(&staticList, "staticList", datasetSizes, inputPath, outputPath);
+    runForStructure(&dynamicList, "dynamicList", datasetSizes, inputPath, outputPath);
+    runForStructure(&staticStack, "staticStack", datasetSizes, inputPath, outputPath);
+    runForStructure(&dynamicStack, "dynamicStack", datasetSizes, inputPath, outputPath);
+    runForStructure(&staticQueue, "staticQueue", datasetSizes, inputPath, outputPath);
+    runForStructure(&dynamicQueue, "dynamicQueue", datasetSizes, inputPath, outputPath);
+
+    std::cout << "Todos os processamentos foram finalizados." << std::endl;
 
     return 0;
 }
-
-

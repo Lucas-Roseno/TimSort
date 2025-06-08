@@ -1,29 +1,32 @@
-// src/DynamicStack.h
-#ifndef DYNAMIC_STACK_H
-#define DYNAMIC_STACK_H
+#pragma once
 
 #include "IDataStructure.h"
 #include <vector>
+#include <stdexcept>
 
-// Implementação de uma pilha dinâmica usando std::vector
-class DynamicStack : public IDataStructure {
-private:
-    std::vector<Timestamp> data;
-
+template<typename T>
+class DynamicStack : public IDataStructure<T> {
 public:
-    // Construtor
-    DynamicStack() = default;
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override; // Push
-    Timestamp& get(int index) override; // Acesso não típico para pilha, mas necessário para interface
+    DynamicStack();
+    ~DynamicStack();
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
 
-    // Método específico de pilha (opcional, mas útil)
-    Timestamp pop();
+    T& get(int index) override;
+    void set(int index, const T& value) override;
+
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(const T& data, Node* next = nullptr) : data(data), next(next) {}
+    };
+
+    Node* m_top;
+    int m_size;
 };
-
-#endif // DYNAMIC_STACK_H
-

@@ -1,30 +1,18 @@
-// src/IDataStructure.h
-#ifndef IDATA_STRUCTURE_H
-#define IDATA_STRUCTURE_H
-
+#pragma once
 #include <vector>
-#include "Timestamp.h"
 
-// Interface base para as estruturas de dados
+template<typename T>
 class IDataStructure {
 public:
-    virtual ~IDataStructure() = default; // Destrutor virtual
-
-    // Adiciona um timestamp à estrutura
-    virtual void add(const Timestamp& ts) = 0;
-
-    // Retorna o timestamp em um determinado índice (para acesso em ordenação)
-    virtual Timestamp& get(int index) = 0;
-
-    // Retorna o tamanho atual da estrutura
+    virtual ~IDataStructure() {}
+    virtual void push(const T& value) = 0;
+    virtual T pop() = 0;
+    virtual T& top() = 0;
+    virtual bool isEmpty() const = 0;
     virtual int size() const = 0;
-
-    // Converte a estrutura para um vetor de Timestamps (para facilitar a ordenação)
-    virtual std::vector<Timestamp> toVector() const = 0;
-
-    // Limpa a estrutura
     virtual void clear() = 0;
+    virtual std::vector<T> toVector() const = 0;
+
+    virtual T& get(int index) = 0;
+    virtual void set(int index, const T& value) = 0;
 };
-
-#endif // IDATA_STRUCTURE_H
-

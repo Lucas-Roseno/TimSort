@@ -1,29 +1,33 @@
-// src/DynamicQueue.h
-#ifndef DYNAMIC_QUEUE_H
-#define DYNAMIC_QUEUE_H
+#pragma once
 
 #include "IDataStructure.h"
-#include <queue>
+#include <vector>
+#include <stdexcept>
 
-// Implementação de uma fila dinâmica usando std::queue
-class DynamicQueue : public IDataStructure {
-private:
-    std::queue<Timestamp> data;
-
+template<typename T>
+class DynamicQueue : public IDataStructure<T> {
 public:
-    // Construtor
-    DynamicQueue() = default;
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override; // Enqueue
-    Timestamp& get(int index) override; // Acesso não típico para fila, mas necessário para interface
+    DynamicQueue();
+    ~DynamicQueue();
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
 
-    // Método específico de fila (opcional, mas útil)
-    Timestamp dequeue();
+    T& get(int index) override;
+    void set(int index, const T& value) override;
+
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(const T& data) : data(data), next(nullptr) {}
+    };
+
+    Node* m_front;
+    Node* m_rear;
+    int m_size;
 };
-
-#endif // DYNAMIC_QUEUE_H
-

@@ -1,33 +1,28 @@
-// src/StaticQueue.h
-#ifndef STATIC_QUEUE_H
-#define STATIC_QUEUE_H
+#pragma once
 
 #include "IDataStructure.h"
-#include <array>
 #include "Constants.h"
+#include <vector>
+#include <stdexcept>
 
-// Implementação de uma fila estática usando std::array
-class StaticQueue : public IDataStructure {
-private:
-    std::array<Timestamp, MAX_STATIC_SIZE> data;
-    int head; // Índice do início da fila
-    int tail; // Índice do final da fila
-    int currentSize;
-
+template<typename T>
+class StaticQueue : public IDataStructure<T> {
 public:
-    // Construtor
     StaticQueue();
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override; // Enqueue
-    Timestamp& get(int index) override; // Acesso não típico para fila, mas necessário para interface
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
 
-    // Método específico de fila (opcional, mas útil)
-    Timestamp dequeue();
+    T& get(int index) override;
+    void set(int index, const T& value) override;
+
+private:
+    T m_arr[MAX_SIZE];
+    int m_front;
+    int m_rear;
+    int m_size;
 };
-
-#endif // STATIC_QUEUE_H
-

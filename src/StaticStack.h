@@ -1,31 +1,26 @@
-// src/StaticStack.h
-#ifndef STATIC_STACK_H
-#define STATIC_STACK_H
+#pragma once
 
 #include "IDataStructure.h"
-#include <array>
 #include "Constants.h"
+#include <vector>
+#include <stdexcept>
 
-// Implementação de uma pilha estática usando std::array
-class StaticStack : public IDataStructure {
-private:
-    std::array<Timestamp, MAX_STATIC_SIZE> data;
-    int currentSize;
-
+template<typename T>
+class StaticStack : public IDataStructure<T> {
 public:
-    // Construtor
     StaticStack();
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override; // Push
-    Timestamp& get(int index) override; // Acesso não típico para pilha, mas necessário para interface
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
 
-    // Método específico de pilha (opcional, mas útil)
-    Timestamp pop();
+    T& get(int index) override;
+    void set(int index, const T& value) override;
+
+private:
+    T m_arr[MAX_SIZE];
+    int m_top;
 };
-
-#endif // STATIC_STACK_H
-

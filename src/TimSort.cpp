@@ -1,97 +1,67 @@
-// src/TimSort.cpp
 #include "TimSort.h"
+#include "Timestamp.h"
 #include <algorithm>
+#include <vector>
 
-// Tamanho mínimo para uma 'run' no TimSort. Geralmente é 32 ou 64.
-const int MIN_RUN = 32;
-
-// Função auxiliar para o Insertion Sort (usado em pequenas 'runs')
-// Ordena o sub-array data[left...right]
-void TimSort::insertionSort(std::vector<Timestamp>& data, int left, int right) {
-    for (int i = left + 1; i <= right; ++i) {
-        Timestamp temp = data[i];
+template<typename T>
+void TimSort<T>::insertionSort(IDataStructure<T>* arr, int left, int right) {
+    for (int i = left + 1; i <= right; i++) {
+        T temp = arr->get(i);
         int j = i - 1;
-        while (j >= left && data[j] > temp) {
-            data[j + 1] = data[j];
+        while (j >= left && arr->get(j) > temp) {
+            arr->set(j + 1, arr->get(j));
             j--;
         }
-        data[j + 1] = temp;
+        arr->set(j + 1, temp);
     }
 }
 
-// Função auxiliar para o Merge Sort (combina duas 'runs' ordenadas)
-// Combina os sub-arrays data[l...m] e data[m+1...r]
-void TimSort::merge(std::vector<Timestamp>& data, int l, int m, int r) {
-    int len1 = m - l + 1;
-    int len2 = r - m;
+template<typename T>
+void TimSort<T>::merge(IDataStructure<T>* arr, int l, int m, int r) {
+    int len1 = m - l + 1, len2 = r - m;
+    std::vector<T> left(len1), right(len2);
 
-    // Cria arrays temporários para armazenar as duas 'runs'
-    std::vector<Timestamp> leftArray(len1);
-    std::vector<Timestamp> rightArray(len2);
-
-    // Copia os dados para os arrays temporários
     for (int i = 0; i < len1; i++)
-        leftArray[i] = data[l + i];
-    for (int j = 0; j < len2; j++)
-        rightArray[j] = data[m + 1 + j];
+        left[i] = arr->get(l + i);
+    for (int i = 0; i < len2; i++)
+        right[i] = arr->get(m + 1 + i);
 
-    int i = 0; // Índice inicial do primeiro sub-array
-    int j = 0; // Índice inicial do segundo sub-array
-    int k = l; // Índice inicial do sub-array mesclado
+    int i = 0, j = 0, k = l;
 
-    // Mescla os arrays temporários de volta para data[l...r]
     while (i < len1 && j < len2) {
-        if (leftArray[i] < rightArray[j]) {
-            data[k] = leftArray[i];
-            i++;
+        if (left[i] <= right[j]) {
+            arr->set(k++, left[i++]);
         } else {
-            data[k] = rightArray[j];
-            j++;
+            arr->set(k++, right[j++]);
         }
-        k++;
     }
 
-    // Copia os elementos restantes do leftArray, se houver algum
     while (i < len1) {
-        data[k] = leftArray[i];
-        i++;
-        k++;
+        arr->set(k++, left[i++]);
     }
 
-    // Copia os elementos restantes do rightArray, se houver algum
     while (j < len2) {
-        data[k] = rightArray[j];
-        j++;
-        k++;
+        arr->set(k++, right[j++]);
     }
 }
 
-// Função principal do TimSort que ordena um vetor de Timestamps
-void TimSort::sort(std::vector<Timestamp>& data) {
-    int n = data.size();
+template<typename T>
+void TimSort<T>::sort(IDataStructure<T>* arr) {
+    int n = arr->size();
+    if (n <= 1) return;
 
-    // 1. Ordena 'runs' individuais de tamanho MIN_RUN usando Insertion Sort
-    for (int i = 0; i < n; i += MIN_RUN) {
-        insertionSort(data, i, std::min((i + MIN_RUN - 1), (n - 1)));
-    }
+    for (int i = 0; i < n; i += RUN)
+        insertionSort(arr, i, std::min((i + RUN - 1), (n - 1)));
 
-    // 2. Mescla as 'runs' ordenadas
-    // Começa mesclando 'runs' de tamanho MIN_RUN, depois 2*MIN_RUN, 4*MIN_RUN, etc.
-    for (int size = MIN_RUN; size < n; size = 2 * size) {
-        // Pega os pontos de início das 'runs' esquerda e direita
+    for (int size = RUN; size < n; size = 2 * size) {
         for (int left = 0; left < n; left += 2 * size) {
-            // Encontra o ponto final da 'run' esquerda e o ponto inicial da 'run' direita
             int mid = left + size - 1;
-            // Encontra o ponto final da 'run' direita
             int right = std::min((left + 2 * size - 1), (n - 1));
 
-            // Mescla data[left...mid] e data[mid+1...right]
-            // Verifica se mid não ultrapassa os limites do array
-            if (mid < right) {
-                merge(data, left, mid, right);
-            }
+            if (mid < right)
+                merge(arr, left, mid, right);
         }
     }
 }
 
-
+template class TimSort<Timestamp>;

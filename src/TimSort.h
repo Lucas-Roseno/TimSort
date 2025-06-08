@@ -1,21 +1,16 @@
-// src/TimSort.h
-#ifndef TIM_SORT_H
-#define TIM_SORT_H
+#pragma once
 
 #include <vector>
-#include "Timestamp.h"
+#include <algorithm>
+#include "Constants.h"
+#include "IDataStructure.h" 
 
-// Implementação do algoritmo de ordenação TimSort
-namespace TimSort {
-    // Função principal do TimSort que ordena um vetor de Timestamps
-    void sort(std::vector<Timestamp>& data);
+template<typename T>
+class TimSort {
+public:
+    void sort(IDataStructure<T>* arr);
 
-    // Função auxiliar para o Insertion Sort (usado em pequenas 'runs')
-    void insertionSort(std::vector<Timestamp>& data, int left, int right);
-
-    // Função auxiliar para o Merge Sort (combina duas 'runs' ordenadas)
-    void merge(std::vector<Timestamp>& data, int l, int m, int r);
-}
-
-#endif // TIM_SORT_H
-
+private:
+    void insertionSort(IDataStructure<T>* arr, int left, int right);
+    void merge(IDataStructure<T>* arr, int l, int m, int r);
+};

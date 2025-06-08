@@ -1,28 +1,36 @@
-// src/StaticList.h
-#ifndef STATIC_LIST_H
-#define STATIC_LIST_H
+#pragma once
 
 #include "IDataStructure.h"
-#include <array>
 #include "Constants.h"
+#include <stdexcept>
+#include <vector>
 
-// Implementação de uma lista estática usando std::array
-class StaticList : public IDataStructure {
-private:
-    std::array<Timestamp, MAX_STATIC_SIZE> data;
-    int currentSize;
-
+template<typename T>
+class StaticList : public IDataStructure<T> {
 public:
-    // Construtor
     StaticList();
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override;
-    Timestamp& get(int index) override;
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
+
+    T& operator[](int index);
+    const T& operator[](int index) const;
+
+    // Implementação inline dos métodos de acesso para ordenação.
+    // Eles usam o operator[] que já existe na lista.
+    T& get(int index) override {
+        return this->operator[](index);
+    }
+
+    void set(int index, const T& value) override {
+        this->operator[](index) = value;
+    }
+
+private:
+    T m_arr[MAX_SIZE];
+    int m_size;
 };
-
-#endif // STATIC_LIST_H
-

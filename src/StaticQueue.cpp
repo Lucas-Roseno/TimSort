@@ -1,69 +1,91 @@
-// src/StaticQueue.cpp
 #include "StaticQueue.h"
+#include "Timestamp.h"
 #include <stdexcept>
+#include <vector>
 
-// Construtor: inicializa head, tail e currentSize
-StaticQueue::StaticQueue() : head(0), tail(0), currentSize(0) {}
+template<typename T>
+StaticQueue<T>::StaticQueue() : m_front(0), m_rear(-1), m_size(0) {}
 
-// Adiciona um timestamp ao final da fila (enqueue)
-void StaticQueue::add(const Timestamp& ts) {
-    if (currentSize < MAX_STATIC_SIZE) {
-        data[tail] = ts;
-        tail = (tail + 1) % MAX_STATIC_SIZE; // Move o tail circularmente
-        currentSize++;
-    } else {
-        // Lançar exceção ou lidar com o erro de fila cheia
+template<typename T>
+bool StaticQueue<T>::isEmpty() const {
+    return m_size == 0;
+}
+
+template<typename T>
+int StaticQueue<T>::size() const {
+    return m_size;
+}
+
+template<typename T>
+void StaticQueue<T>::clear() {
+    m_front = 0;
+    m_rear = -1;
+    m_size = 0;
+}
+
+template<typename T>
+void StaticQueue<T>::push(const T& value) {
+    if (m_size >= MAX_SIZE) {
         throw std::out_of_range("StaticQueue is full");
     }
+    m_rear = (m_rear + 1) % MAX_SIZE;
+    m_arr[m_rear] = value;
+    m_size++;
 }
 
-// Retorna uma referência para o timestamp em um determinado índice.
-// Nota: Acesso por índice não é típico para filas, mas é necessário para satisfazer a interface IDataStructure.
-// Em uma aplicação de fila pura, este método não existiria ou lançaria uma exceção.
-// Acessar o elemento no índice 'index' em uma fila estática implementada com array circular
-// requer calcular a posição correta no array: (head + index) % MAX_STATIC_SIZE.
-Timestamp& StaticQueue::get(int index) {
-    if (index >= 0 && index < currentSize) {
-        return data[(head + index) % MAX_STATIC_SIZE];
-    } else {
-        throw std::out_of_range("Index out of bounds for StaticQueue");
+template<typename T>
+T StaticQueue<T>::pop() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticQueue is empty");
     }
+    T value = m_arr[m_front];
+    m_front = (m_front + 1) % MAX_SIZE;
+    m_size--;
+    return value;
 }
 
-// Retorna o número de elementos na fila
-int StaticQueue::size() const {
-    return currentSize;
+template<typename T>
+T& StaticQueue<T>::top() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticQueue is empty");
+    }
+    return m_arr[m_front];
 }
 
-// Converte a fila estática para um vetor de Timestamps
-std::vector<Timestamp> StaticQueue::toVector() const {
-    std::vector<Timestamp> vec;
-    vec.reserve(currentSize); // Otimização: reserva espaço
-    int current = head;
-    for (int i = 0; i < currentSize; ++i) {
-        vec.push_back(data[current]);
-        current = (current + 1) % MAX_STATIC_SIZE;
+template<typename T>
+std::vector<T> StaticQueue<T>::toVector() const {
+    std::vector<T> vec;
+    vec.reserve(m_size);
+    if (!isEmpty()) {
+        int count = 0;
+        int i = m_front;
+        while(count < m_size) {
+            vec.push_back(m_arr[i]);
+            i = (i + 1) % MAX_SIZE;
+            count++;
+        }
     }
     return vec;
 }
 
-// Limpa a fila estática redefinindo head, tail e currentSize
-void StaticQueue::clear() {
-    head = 0;
-    tail = 0;
-    currentSize = 0;
-    // Não é necessário limpar os elementos da array, pois eles serão sobrescritos
-}
-
-// Remove e retorna o timestamp do início da fila (dequeue)
-Timestamp StaticQueue::dequeue() {
-    if (currentSize > 0) {
-        Timestamp front = data[head];
-        head = (head + 1) % MAX_STATIC_SIZE; // Move o head circularmente
-        currentSize--;
-        return front;
-    } else {
-        throw std::out_of_range("Dequeue from empty StaticQueue");
+template<typename T>
+T& StaticQueue<T>::get(int index) {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("StaticQueue: Index out of range.");
     }
+    int physical_index = (m_front + index) % MAX_SIZE;
+    return m_arr[physical_index];
 }
 
+template<typename T>
+void StaticQueue<T>::set(int index, const T& value) {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("StaticQueue: Index out of range.");
+    }
+    int physical_index = (m_front + index) % MAX_SIZE;
+    m_arr[physical_index] = value;
+}
+
+template T& StaticQueue<Timestamp>::get(int);
+template void StaticQueue<Timestamp>::set(int, const Timestamp&);
+template class StaticQueue<Timestamp>;

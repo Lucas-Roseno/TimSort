@@ -1,26 +1,42 @@
-// src/DynamicList.h
-#ifndef DYNAMIC_LIST_H
-#define DYNAMIC_LIST_H
+#pragma once
 
 #include "IDataStructure.h"
 #include <vector>
+#include <stdexcept>
 
-// Implementação de uma lista dinâmica usando std::vector
-class DynamicList : public IDataStructure {
-private:
-    std::vector<Timestamp> data;
-
+template<typename T>
+class DynamicList : public IDataStructure<T> {
 public:
-    // Construtor
-    DynamicList() = default;
-
-    // Implementação dos métodos da interface IDataStructure
-    void add(const Timestamp& ts) override;
-    Timestamp& get(int index) override;
+    DynamicList();
+    ~DynamicList();
+    void push(const T& value) override;
+    T pop() override;
+    T& top() override;
+    bool isEmpty() const override;
     int size() const override;
-    std::vector<Timestamp> toVector() const override;
     void clear() override;
+    std::vector<T> toVector() const override;
+
+    T& operator[](int index);
+    const T& operator[](int index) const;
+    
+    // Implementação inline dos métodos de acesso para ordenação
+    T& get(int index) override {
+        return this->operator[](index);
+    }
+
+    void set(int index, const T& value) override {
+        this->operator[](index) = value;
+    }
+
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(const T& data, Node* next = nullptr) : data(data), next(next) {}
+    };
+
+    Node* m_head;
+    int m_size;
+    Node* getNodeAt(int index) const;
 };
-
-#endif // DYNAMIC_LIST_H
-

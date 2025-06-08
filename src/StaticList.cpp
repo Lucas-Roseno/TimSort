@@ -1,48 +1,68 @@
-// src/StaticList.cpp
 #include "StaticList.h"
-#include <stdexcept>
+#include "Timestamp.h"
 
-// Construtor: inicializa o tamanho atual como 0
-StaticList::StaticList() : currentSize(0) {}
+template<typename T>
+StaticList<T>::StaticList() : m_size(0) {}
 
-// Adiciona um timestamp à lista estática, verificando se há espaço
-void StaticList::add(const Timestamp& ts) {
-    if (currentSize < MAX_STATIC_SIZE) {
-        data[currentSize++] = ts;
-    } else {
-        // Lançar exceção ou lidar com o erro de lista cheia
+template<typename T>
+void StaticList<T>::push(const T& value) {
+    if (m_size >= MAX_SIZE) {
         throw std::out_of_range("StaticList is full");
     }
+    m_arr[m_size++] = value;
 }
 
-// Retorna uma referência para o timestamp no índice especificado, verificando limites
-Timestamp& StaticList::get(int index) {
-    if (index >= 0 && index < currentSize) {
-        return data[index];
-    } else {
-        // Lançar exceção ou lidar com o erro de índice inválido
-        throw std::out_of_range("Index out of bounds for StaticList");
+template<typename T>
+T StaticList<T>::pop() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticList is empty");
     }
+    return m_arr[--m_size];
 }
 
-// Retorna o número atual de elementos na lista
-int StaticList::size() const {
-    return currentSize;
-}
-
-// Converte a parte utilizada da lista estática para um vetor de Timestamps
-std::vector<Timestamp> StaticList::toVector() const {
-    std::vector<Timestamp> vec;
-    vec.reserve(currentSize); // Otimização: reserva espaço
-    for (int i = 0; i < currentSize; ++i) {
-        vec.push_back(data[i]);
+template<typename T>
+T& StaticList<T>::top() {
+    if (isEmpty()) {
+        throw std::out_of_range("StaticList is empty");
     }
-    return vec;
+    return m_arr[m_size - 1];
 }
 
-// Limpa a lista estática redefinindo o tamanho atual para 0
-void StaticList::clear() {
-    currentSize = 0;
-    // Não é necessário limpar os elementos da array, pois eles serão sobrescritos
+template<typename T>
+bool StaticList<T>::isEmpty() const {
+    return m_size == 0;
 }
 
+template<typename T>
+int StaticList<T>::size() const {
+    return m_size;
+}
+
+template<typename T>
+void StaticList<T>::clear() {
+    m_size = 0;
+}
+
+template<typename T>
+std::vector<T> StaticList<T>::toVector() const {
+    return std::vector<T>(m_arr, m_arr + m_size);
+}
+
+template<typename T>
+T& StaticList<T>::operator[](int index) {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("Index out of range");
+    }
+    return m_arr[index];
+}
+
+template<typename T>
+const T& StaticList<T>::operator[](int index) const {
+    if (index < 0 || index >= m_size) {
+        throw std::out_of_range("Index out of range");
+    }
+    return m_arr[index];
+}
+
+// Instanciação explícita do template para a classe Timestamp
+template class StaticList<Timestamp>;
